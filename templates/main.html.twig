@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container my-3">
+
+        {% if app.user %}
+            <div class="text-right">
+                You are logged in as {{ app.user.username }}, <a href="{{ path('app_logout') }}"><i
+                            class="fas fa-power-off"></i> Logout</a>
+            </div>
+        {% endif %}
+
+        <div class="mt-5">
+            <table id="list" class="table table-hover">
+                <thead class="bg-primary text-white">
+                <tr>
+                    <th>
+                        Username
+                    </th>
+                    <th>
+                        Action
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>
+                            <button
+                                    type="button"
+                                    data-id="{{ user.id }}"
+                                    data-disabled="{{ user.disabled }}"
+                                    class="btn btn-sm {{ user.disabled ? 'btn-success' : 'btn-danger' }} disableButton"
+                                    {{ user.disabled ? 'disabled' : '' }}
+                            >
+                                {{ user.disabled ? 'Enable' : 'Disable' }}
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css"/>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#list').DataTable({
+                "columnDefs": [{
+                    "targets": 1,
+                    "orderable": false
+                }]
+            });
+        });
+
+        const buttons = document.getElementsByClassName('disableButton');
+
+        Array.from(buttons).forEach(item => {
+            item.addEventListener('click',
+                event => disableUser(
+                    event,
+                    item.getAttribute('data-id'),
+                    item.getAttribute('data-disabled')
+                ));
+        });
+
+        function disableUser(event, id, disabled) {
+            const url = `/disable/${id}`;
+
+            fetch(url, {method: 'post'})
+                .then(data => {
+                    if (data.status === 201) window.location = "/logout";
+
+                    return data.json();
+                })
+                .then(resp => {
+                    console.log(resp.status);
+                    switchClasses(event, disabled);
+                });
+        }
+
+        function switchClasses(event, disabled) {
+
+            const {target} = event;
+            target.classList.toggle('btn-danger');
+            target.classList.toggle('btn-success');
+
+            if (disabled)
+            {
+                target.innerHTML = 'Disable';
+                target.disabled = false;
+            } else {
+                target.innerHTML = 'Enable';
+                target.disabled = true;
+            }
+        }
+    </script>
+{% endblock %}
