@@ -42,6 +42,7 @@ class UserFixtures extends Fixture
 
 	public function load(ObjectManager $manager)
 	{
+		//Load examplary users to database
 		foreach (self::$users as $name => $password)
 		{
 			$user = new User();

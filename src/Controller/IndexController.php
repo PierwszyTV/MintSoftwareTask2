@@ -25,8 +25,10 @@ class IndexController extends AbstractController
 	 */
 	public function indexAction()
 	{
+		//Check if user is enabled
 		if (!$this->getUser() || $this->getUser()->getDisabled()) return $this->redirectToRoute('app_logout');
 
+		//Get all users from database
 		$users = $this->userRepository->findAll();
 
 		return $this->render('main.html.twig', [

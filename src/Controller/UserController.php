@@ -29,14 +29,18 @@ class UserController extends AbstractController
 	 */
 	public function disableUserAction(User $user = null)
 	{
+		//Check if user is logged in
 		$this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
+		//Check if user is disabled
 		if (!$user || $this->getUser()->getDisabled()) return new JsonResponse('Access denied!', 403);
 
+		//Toggle disable property
 		$user->setDisabled(!$user->getDisabled());
 
 		$this->entityManager->flush();
 
+		//If change myself force redirect
 		if ($user->getId() === $this->getUser()->getId()) return new JsonResponse('Redirect!', 201);
 
 		return new JsonResponse('User has changed!', 200);
